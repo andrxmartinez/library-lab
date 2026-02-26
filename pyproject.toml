@@ -1,0 +1,11 @@
+[LIBRARY LAB]
+name = "library lab"
+version = "0.1.0"
+description = "Automation Lab"
+author = "Andres Martinez"
+
+dependencies = []
+
+[build-system]
+requires = []
+build-backend = "setuptools.build_meta"
