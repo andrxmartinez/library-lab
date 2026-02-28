@@ -1,6 +1,7 @@
 from .book import Book
 from .user import User
 from .loan import Loan
+from .exceptions import BookNotInLibraryError, BookNotBorrowedByUserError, UserNotRegisteredError, LoanNotFoundError, BookAlreadyLoanedError, ReturnBookFailedError
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -34,11 +35,11 @@ class Library:
     def lend_book(self, book:Book, user:User) -> Loan:
         # Initial validations
         if book not in self.books:
-            raise ValueError("Book does not exist in the library")
+            raise BookNotInLibraryError()
         if user not in self.users:
-            raise ValueError("User could not be verified")
+            raise UserNotRegisteredError()
         if not book.lend():
-            raise ValueError("Loan failed, the book is already lent")
+            raise BookAlreadyLoanedError()
 
         # The library MUST manage the loan internally
         loan = Loan(book, user)
@@ -58,15 +59,15 @@ class Library:
     def return_book(self, book:Book, user:User) -> Loan:
         # Initial validations
         if book not in self.books:
-            raise ValueError("The library does not own this book")
+            raise BookNotInLibraryError()
         if user not in self.users:
-            raise ValueError("User could not be verified")
+            raise UserNotRegisteredError()
         if book not in user.borrowed_books:
-            raise ValueError("The user does not have this book")
+            raise BookNotBorrowedByUserError()
 
         # Attempt to return the book
         if not book.return_book():
-            raise ValueError("Return failed")
+            raise ReturnBookFailedError()
 
         # Search for active loan
         found_loan = None
@@ -78,7 +79,7 @@ class Library:
 
         # Validate that the loan was found
         if found_loan is None:
-            raise ValueError("No active loan found for this book and user")
+            raise LoanNotFoundError()
 
         # Update user
         user.remove_book(book)
