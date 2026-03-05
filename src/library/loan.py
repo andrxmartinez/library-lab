@@ -6,11 +6,11 @@ from .user import User
 
 @dataclass
 class Loan:
-    loan_date: Optional[datetime] = None
-    return_date: Optional[datetime] = None
     book: Optional[Book] = None
     user: Optional[User] = None
     status: bool = False
+    loan_date: Optional[datetime] = None
+    return_date: Optional[datetime] = None
 
     def register_loan(self) -> None:
         self.status = True

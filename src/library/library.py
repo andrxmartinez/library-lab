@@ -56,8 +56,8 @@ class Library:
         # Return the active loan
         return loan
 
-    def return_book(self, book:Book, user:User) -> Loan:
-        # Initial validations
+    def return_book(self, book: Book, user: User) -> Loan:
+        # Initial Validations
         if book not in self.books:
             raise BookNotInLibraryError()
         if user not in self.users:
@@ -65,24 +65,23 @@ class Library:
         if book not in user.borrowed_books:
             raise BookNotBorrowedByUserError()
 
-        # Attempt to return the book
-        if not book.return_book():
-            raise ReturnBookFailedError()
-
-        # Search for active loan
+        # Search for loan
         found_loan = None
         for loan in self.loans:
             if loan.book == book and loan.user == user and loan.is_active():
-                loan.register_return()
                 found_loan = loan
                 break
 
-        # Validate that the loan was found
+        # Validate that the loan exists
         if found_loan is None:
             raise LoanNotFoundError()
 
-        # Update user
+
+        found_loan.register_return()
+
+        if not book.return_book():
+            raise ReturnBookFailedError()
+
         user.remove_book(book)
 
-        # Return closed loan
         return found_loan
