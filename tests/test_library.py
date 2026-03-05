@@ -23,6 +23,7 @@ def u2():
 def u3():
     return User("Sophie Test", 3)
 
+#Happy Path 
 
 # @pytest.mark.parametrize("book", [b1, b2, b3])
 def test_register_book_success(library, book):
@@ -52,8 +53,52 @@ def test_return_book_success(library, book, user):
     assert book.available
     assert book not in user.borrowed_books
 
+#Unhappy Path
+
 def test_lend_book_not_registered(library, book, user):
     library.register_user(user)
-
     with pytest.raises(BookNotInLibraryError):
         library.lend_book(book, user)
+
+def test_lend_user_not_registered(library, book, user):
+    library.register_book(book)
+    with pytest.raises(UserNotRegisteredError):
+        library.lend_book(book, user)
+
+def test_lend_book_already_loaned(library, book, user):
+    library.register_book(book)
+    library.register_user(user)
+    library.lend_book(book, user)
+    with pytest.raises(BookAlreadyLoanedError):
+        library.lend_book(book, user)
+
+def test_return_book_not_in_library(library, book, user):
+    library.register_user(user)
+    with pytest.raises(BookNotInLibraryError):
+        library.return_book(book, user)
+
+
+def test_return_user_not_registered(library, book, user):
+    library.register_book(book)
+    with pytest.raises(UserNotRegisteredError):
+        library.return_book(book, user)
+
+def test_return_book_not_borrowed(library, book, user):
+    library.register_book(book)
+    library.register_user(user)
+    with pytest.raises(BookNotBorrowedByUserError):
+        library.return_book(book, user)
+
+def test_return_loan_not_found(library, book, user):
+    library.register_book(book)
+    library.register_user(user)
+    loan = library.lend_book(book, user)
+  
+    #This manually breaks the system to trigger the error (Simulates corrupt state)
+    library.loans.remove(loan)
+
+    with pytest.raises(LoanNotFoundError):
+        library.return_book(book, user)
+
+
+
