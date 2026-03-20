@@ -1,7 +1,7 @@
 from .book import Book
 from .user import User
 from .loan import Loan
-from .exceptions import BookNotInLibraryError, BookNotBorrowedByUserError, UserNotRegisteredError, LoanNotFoundError, BookAlreadyLoanedError, ReturnBookFailedError
+from .exceptions import BookAlreadyRegistered, UserAlreadyRegistered, BookNotInLibraryError, BookNotBorrowedByUserError, UserNotRegisteredError, LoanNotFoundError, BookAlreadyLoanedError, ReturnBookFailedError
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -17,14 +17,14 @@ class Library:
             self.books.append(book)
             return True
         else:
-            return False
+            raise BookAlreadyRegistered()
 
     def register_user(self, user:User) -> bool:
         if user not in self.users:
             self.users.append(user)
             return True
         else:
-            return False
+            raise UserAlreadyRegistered()
 
     def show_available_books(self) -> list[Book]:
         return [book for book in self.books if book.available]

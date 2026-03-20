@@ -1,6 +1,6 @@
 import pytest
 from library import Library, Book, User, Loan
-from library.exceptions import BookNotInLibraryError, BookNotBorrowedByUserError, UserNotRegisteredError, LoanNotFoundError, BookAlreadyLoanedError, ReturnBookFailedError
+from library.exceptions import BookAlreadyRegistered, UserAlreadyRegistered, BookNotInLibraryError, BookNotBorrowedByUserError, UserNotRegisteredError, LoanNotFoundError, BookAlreadyLoanedError, ReturnBookFailedError
 
 @pytest.fixture
 def library():
@@ -84,8 +84,34 @@ def test_show_available_books_success(library, books, users):
         assert book in available_books
 
 
+def test_show_users_success(library, users):
+    #Register Users 
+    for user in users: 
+        library.register_user(user)
+
+    registered_users = library.show_users()
+    assert users == registered_users
 
 #Unhappy Path
+
+def test_book_already_registered(library, book):
+    library.register_book(book)
+    assert book in library.books
+    with pytest.raises(BookAlreadyRegistered):
+        library.register_book(book)
+
+    #Validate that the book wasn't added again to the library
+    assert len(library.books) == 1
+
+def test_user_already_registered(library, user):
+    library.register_user(user)
+    assert user in library.users
+    with pytest.raises(UserAlreadyRegistered):
+        library.register_user(user)
+
+    #Validate the user wasn't added again to the library
+    assert len(library.users) == 1
+
 
 def test_lend_book_not_registered(library, book, user):
     library.register_user(user)
@@ -108,7 +134,6 @@ def test_return_book_not_in_library(library, book, user):
     library.register_user(user)
     with pytest.raises(BookNotInLibraryError):
         library.return_book(book, user)
-
 
 def test_return_user_not_registered(library, book, user):
     library.register_book(book)

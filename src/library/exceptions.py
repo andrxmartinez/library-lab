@@ -2,6 +2,13 @@ class LibraryError(Exception):
     """Base exception for all library domain errors"""
     pass
 
+class BookAlreadyRegistered(LibraryError):
+    """Raised when attempting to register the same book more than once"""
+    pass
+
+class UserAlreadyRegistered(LibraryError):
+    """Raised when attemting to register a user more than once"""
+
 class BookNotInLibraryError(LibraryError):
     """"Raised when the book does not exist in the library"""
     pass
