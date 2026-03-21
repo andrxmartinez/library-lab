@@ -112,17 +112,24 @@ def test_user_already_registered(library, user):
     #Validate the user wasn't added again to the library
     assert len(library.users) == 1
 
+@pytest.mark.parametrize(
+    "register_book, register_user, expected_exception",
+    [
+        (False, True, BookNotInLibraryError),
+        (True, False, UserNotRegisteredError),
+    ]
+)
+def test_lend_book_errors(library, book, user, register_book, register_user, book_loaned, expected_exception):
+    
+    if register_book:
+        library.register_book(book)
+    
+    if register_user:
+        library.register_user(user)
 
-def test_lend_book_not_registered(library, book, user):
-    library.register_user(user)
-    with pytest.raises(BookNotInLibraryError):
+    with pytest.raises(expected_exception):
         library.lend_book(book, user)
-
-def test_lend_user_not_registered(library, book, user):
-    library.register_book(book)
-    with pytest.raises(UserNotRegisteredError):
-        library.lend_book(book, user)
-
+        
 def test_lend_book_already_loaned(library, book, user):
     library.register_book(book)
     library.register_user(user)
