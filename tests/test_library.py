@@ -119,7 +119,7 @@ def test_user_already_registered(library, user):
         (True, False, UserNotRegisteredError),
     ]
 )
-def test_lend_book_errors(library, book, user, register_book, register_user, book_loaned, expected_exception):
+def test_lend_book_errors(library, book, user, register_book, register_user, expected_exception):
     
     if register_book:
         library.register_book(book)
@@ -137,21 +137,30 @@ def test_lend_book_already_loaned(library, book, user):
     with pytest.raises(BookAlreadyLoanedError):
         library.lend_book(book, user)
 
-def test_return_book_not_in_library(library, book, user):
-    library.register_user(user)
-    with pytest.raises(BookNotInLibraryError):
-        library.return_book(book, user)
+@pytest.mark.parametrize(
+        "register_book, register_user, complete_loan, expected_exception",
+    [   
+        (False, True, False, BookNotInLibraryError),
+        (True, False, False, UserNotRegisteredError),
+        (True, True, False, BookNotBorrowedByUserError)
+    ]
+        
+)
+def test_return_book_errors(library, book, user, register_book, register_user, complete_loan, expected_exception):
+      
+    if register_book:
+        library.register_book(book)
 
-def test_return_user_not_registered(library, book, user):
-    library.register_book(book)
-    with pytest.raises(UserNotRegisteredError):
-        library.return_book(book, user)
+    if register_user:
+        library.register_user(user)
 
-def test_return_book_not_borrowed(library, book, user):
-    library.register_book(book)
-    library.register_user(user)
-    with pytest.raises(BookNotBorrowedByUserError):
-        library.return_book(book, user)
+    if complete_loan:
+        library.register_book(book)
+        library.register_user(user)
+        library.lend_book(book, user)
+
+    with pytest.raises(expected_exception):
+        library.return_book(book, user)       
 
 def test_return_loan_not_found(library, book, user):
     library.register_book(book)
@@ -180,5 +189,11 @@ def test_return_loan_failed(monkeypatch, library, book, user):
     #Validate exception
     with pytest.raises(ReturnBookFailedError):
         library.return_book(book, user)
+
+    assert loan in library.loans
+    assert  loan.is_active()
+    assert book in user.borrowed_books
+    assert not book.available
+
 
 

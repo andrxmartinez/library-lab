@@ -75,12 +75,12 @@ class Library:
         # Validate that the loan exists
         if found_loan is None:
             raise LoanNotFoundError()
-
-
-        found_loan.register_return()
-
+    
         if not book.return_book():
             raise ReturnBookFailedError()
+        
+        #Register return
+        found_loan.register_return()
 
         user.remove_book(book)
 
